@@ -1,40 +1,60 @@
-import { Card, CardDescription, CardHeader } from "./ui";
+import { formatDistanceToNow } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import {
+  Button,
+  Card,
+  CardDescription,
+  CardHeader,
+  CardOverlay,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogOverlay,
+  DialogPortal,
+  DialogTrigger,
+} from "./ui";
 
-export const NoteCard = () => {
+interface NoteCardProps {
+  note: {
+    date: Date;
+    content: string;
+  };
+}
+
+export const NoteCard = ({ note }: NoteCardProps) => {
   return (
-    <div className="grid grid-cols-3 gap-6 auto-rows-[250px]">
-      <Card className="bg-slate-700">
-        <CardHeader className="text-slate-200">Adicionar nota</CardHeader>
-        <CardDescription>
-          Grave uma nota de áudio que será convertida para texto
-          automaticamente.
-        </CardDescription>
-      </Card>
-      <Card>
-        <CardHeader>há 2 dias</CardHeader>
-        <CardDescription>
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Omnis
-          facilis assumenda corporis debitis vel, beatae porro consequatur
-          obcaecati. Aut tenetur tempore debitis eveniet cum blanditiis dolor
-          dicta, culpa repudiandae officia. Lorem ipsum dolor sit amet
-          consectetur, adipisicing elit. Omnis facilis assumenda corporis
-          debitis vel, beatae porro consequatur obcaecati. Aut tenetur tempore
-          debitis eveniet cum blanditiis dolor dicta, culpa repudiandae officia.
-          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Omnis
-          facilis assumenda corporis debitis vel, beatae porro consequatur
-          obcaecati. Aut tenetur tempore debitis eveniet cum blanditiis dolor
-          dicta, culpa repudiandae officia.
-        </CardDescription>
-      </Card>
-      <Card>
-        <CardHeader>há 4 dias</CardHeader>
-        <CardDescription>
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae ab
-          cumque quo aliquid nihil rerum, unde nesciunt temporibus! Nihil cum
-          cupiditate qui repellat a vero quisquam corrupti voluptates porro
-          corporis!
-        </CardDescription>
-      </Card>
-    </div>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Card>
+          <CardOverlay />
+          <CardHeader>
+            {formatDistanceToNow(note.date, {
+              locale: ptBR,
+              addSuffix: true,
+            })}
+          </CardHeader>
+          <CardDescription>{note.content}</CardDescription>
+        </Card>
+      </DialogTrigger>
+
+      <DialogPortal>
+        <DialogOverlay />
+        <DialogContent>
+          <DialogClose />
+          <div className="flex flex-col gap-4 flex-1">
+            <CardHeader>
+              {formatDistanceToNow(note.date, {
+                locale: ptBR,
+                addSuffix: true,
+              })}
+            </CardHeader>
+            <CardDescription>{note.content}</CardDescription>
+          </div>
+          <Button type="button">
+            Deseja <span className="text-red-600">apagar essa nota?</span>
+          </Button>
+        </DialogContent>
+      </DialogPortal>
+    </Dialog>
   );
 };

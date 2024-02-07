@@ -3,18 +3,18 @@ import { ButtonHTMLAttributes, HTMLAttributes, forwardRef } from "react";
 
 interface CardProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
 
-const Card = forwardRef<HTMLButtonElement, CardProps>(
-  ({ className, children, ...props }) => {
+export const Card = forwardRef<HTMLButtonElement, CardProps>(
+  ({ className, children, ...props }, ref) => {
     return (
       <button
         className={cn(
-          "rounded-md text-left bg-slate-800 p-4 space-y-3 overflow-hidden relative hover:ring-slate-600 hover:ring-2 focus-visible:ring-2 outline-none focus-visible:ring-lime-400 cursor-pointer transition-all duration-300",
+          "rounded-md text-left flex flex-col bg-slate-800 p-4 overflow-hidden relative hover:ring-slate-600 hover:ring-2 focus-visible:ring-2 outline-none focus-visible:ring-lime-400 cursor-pointer transition-all duration-300",
           className
         )}
+        ref={ref}
         {...props}
       >
         {children}
-        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-slate-950 pointer-events-none" />
       </button>
     );
   }
@@ -22,12 +22,18 @@ const Card = forwardRef<HTMLButtonElement, CardProps>(
 
 Card.displayName = "Card";
 
-interface CardHeaderProps extends HTMLAttributes<HTMLHeadingElement> {}
+const CardOverlay = () => {
+  return (
+    <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-slate-950 pointer-events-none" />
+  );
+};
 
-const CardHeader = forwardRef<HTMLHeadingElement, CardHeaderProps>(
+interface CardHeaderProps extends HTMLAttributes<HTMLSpanElement> {}
+
+const CardHeader = forwardRef<HTMLSpanElement, CardHeaderProps>(
   ({ className, ...props }, ref) => {
     return (
-      <h4
+      <span
         className={cn("text-sm font-medium text-slate-300", className)}
         ref={ref}
         {...props}
@@ -44,7 +50,7 @@ const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className, ...props }, ref) => {
     return (
       <p
-        className={cn("text-sm leading-6 text-slate-400", className)}
+        className={cn("break-all text-sm leading-6 text-slate-400", className)}
         ref={ref}
         {...props}
       />
@@ -54,4 +60,4 @@ const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
 
 CardDescription.displayName = "CardDescription";
 
-export { Card, CardDescription, CardHeader };
+export { CardDescription, CardHeader, CardOverlay };
