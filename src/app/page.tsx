@@ -1,4 +1,4 @@
-import { NoteCard, Search } from "@/components";
+import { AllNotesCard } from "@/components";
 import Image from "next/image";
 
 export default function Home() {
@@ -11,9 +11,7 @@ export default function Home() {
         width={120}
         height={23}
       />
-      <Search />
-      <div className="h-px bg-slate-700" />
-      <NoteCard />
+      <AllNotesCard />
     </div>
   );
 }
