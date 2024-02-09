@@ -2,8 +2,9 @@
 
 import { ChangeEvent, FormEvent, useState } from "react";
 import { toast } from "sonner";
+import { Editor } from "./Editor";
+import { Recording } from "./Recording";
 import {
-  Button,
   Card,
   CardDescription,
   Dialog,
@@ -13,13 +14,21 @@ import {
   DialogTrigger,
 } from "./ui";
 
-export const NewNoteCard = () => {
+interface NewNoteCardProps {
+  onNoteCreated: (content: string) => void;
+}
+
+let speechRecognition: SpeechRecognition | null = null;
+
+export const NewNoteCard = ({ onNoteCreated }: NewNoteCardProps) => {
   const [shouldShowOnboarding, setShouldShowOnboarding] =
     useState<boolean>(true);
+  const [isRecording, setIsRecording] = useState<boolean>(false);
   const [content, setContent] = useState<string>("");
 
   const handleStartEditor = () => {
     setShouldShowOnboarding(false);
+    setIsRecording(false);
   };
 
   const handleContentChanged = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -33,7 +42,58 @@ export const NewNoteCard = () => {
   const handleSaveNote = (e: FormEvent) => {
     e.preventDefault();
 
+    if (content.trim() === "") return;
+
+    onNoteCreated(content);
+    setShouldShowOnboarding(true);
+    setContent("");
+
     toast.success("Nota salva com sucesso!");
+  };
+
+  const handleStartRecording = () => {
+    const isSpeechRecognitionAvailable =
+      "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
+
+    if (!isSpeechRecognitionAvailable) {
+      toast.error("Sem suporte ao reconhecimento de fala.");
+      return;
+    }
+
+    setIsRecording(true);
+    setShouldShowOnboarding(false);
+
+    const SpeechRecognitionAPI =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    speechRecognition = new SpeechRecognitionAPI();
+
+    speechRecognition.lang = "pt-BR";
+    speechRecognition.continuous = true;
+    speechRecognition.maxAlternatives = 1;
+    speechRecognition.interimResults = true;
+
+    speechRecognition.onresult = (event) => {
+      const transcription = Array.from(event.results).reduce((text, result) => {
+        return text.concat(result[0].transcript);
+      }, "");
+
+      setContent(transcription);
+    };
+
+    speechRecognition.onerror = (error) => {
+      console.error(error);
+    };
+
+    speechRecognition.start();
+  };
+
+  const handleStopRecording = () => {
+    if (speechRecognition !== null) {
+      speechRecognition.stop();
+    }
+
+    setIsRecording(false);
   };
 
   return (
@@ -41,51 +101,29 @@ export const NewNoteCard = () => {
       <DialogTrigger asChild>
         <Card>
           <h4>Criar uma nova nota.</h4>
-          <CardDescription></CardDescription>
+          <CardDescription>
+            Grave uma nota em áudio que será convertida para texto
+            automaticamente.
+          </CardDescription>
         </Card>
       </DialogTrigger>
       <DialogPortal>
         <DialogOverlay />
         <DialogContent>
-          <form
-            onSubmit={handleSaveNote}
-            className="flex flex-1 gap-4 p-4 flex-col"
-          >
-            <div className="flex flex-1 flex-col gap-4">
-              <h4>Adicionar nota</h4>
-              {shouldShowOnboarding ? (
-                <p>
-                  Comece{" "}
-                  <button
-                    type="button"
-                    className="hover:underline text-lime-600 underline-offset-2"
-                  >
-                    gravando uma nota com áudio
-                  </button>{" "}
-                  ou se preferir{" "}
-                  <button
-                    type="button"
-                    onClick={handleStartEditor}
-                    className="hover:underline text-lime-600 underline-offset-2"
-                  >
-                    utilize apenas texto
-                  </button>
-                  .
-                </p>
-              ) : (
-                <textarea
-                  onChange={handleContentChanged}
-                  autoFocus
-                  className="text-sm leading-6 bg-transparent outline-none resize-none flex-1 ring-2 p-2 rounded-md ring-background"
-                />
-              )}
-            </div>
-            <Button
-              type="submit"
-              className="bg-lime-600 hover:bg-lime-700 ring-lime-700 focus-visible:bg-lime-700 text-lime-50"
-            >
-              Salvar nota
-            </Button>
+          <form className="flex flex-1 gap-4 flex-col">
+            <Editor
+              handleStartRecording={handleStartRecording}
+              handleStartEditor={handleStartEditor}
+              handleContentChanged={handleContentChanged}
+              shouldShowOnboarding={shouldShowOnboarding}
+              content={content}
+            />
+
+            <Recording
+              handleSaveNote={handleSaveNote}
+              handleStopRecording={handleStopRecording}
+              isRecording={isRecording}
+            />
           </form>
         </DialogContent>
       </DialogPortal>

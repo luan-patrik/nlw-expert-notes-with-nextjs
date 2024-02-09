@@ -15,13 +15,15 @@ import {
 } from "./ui";
 
 interface NoteCardProps {
+  handleDeleteNote: (id: string) => void;
   note: {
+    id: string;
     date: Date;
     content: string;
   };
 }
 
-export const NoteCard = ({ note }: NoteCardProps) => {
+export const NoteCard = ({ handleDeleteNote, note }: NoteCardProps) => {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -41,18 +43,20 @@ export const NoteCard = ({ note }: NoteCardProps) => {
         <DialogOverlay />
         <DialogContent>
           <DialogClose />
-          <div className="flex flex-col gap-4 flex-1">
+          <div className="flex flex-col gap-4 h-full">
             <CardHeader>
               {formatDistanceToNow(note.date, {
                 locale: ptBR,
                 addSuffix: true,
               })}
             </CardHeader>
-            <CardDescription>{note.content}</CardDescription>
+            <CardDescription className="overflow-y-auto">
+              {note.content}
+            </CardDescription>
+            <Button onClick={() => handleDeleteNote(note.id)} type="button">
+              Deseja <span className="text-red-600">apagar essa nota?</span>
+            </Button>
           </div>
-          <Button type="button">
-            Deseja <span className="text-red-600">apagar essa nota?</span>
-          </Button>
         </DialogContent>
       </DialogPortal>
     </Dialog>

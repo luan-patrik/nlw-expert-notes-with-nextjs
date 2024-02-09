@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 import { ButtonHTMLAttributes, HTMLAttributes, forwardRef } from "react";
 
@@ -50,7 +52,10 @@ const CardDescription = forwardRef<HTMLParagraphElement, CardDescriptionProps>(
   ({ className, ...props }, ref) => {
     return (
       <p
-        className={cn("break-all text-sm leading-6 text-slate-400", className)}
+        className={cn(
+          "text-sm leading-6 break-words h-full w-full text-slate-400",
+          className
+        )}
         ref={ref}
         {...props}
       />
